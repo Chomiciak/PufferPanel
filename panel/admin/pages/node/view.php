@@ -19,8 +19,8 @@
 session_start();
 require_once('../../../core/framework/framework.core.php');
 
-if($core->framework->auth->isLoggedIn($_SERVER['REMOTE_ADDR'], $core->framework->auth->getCookie('pp_auth_token'), null, true) !== true){
-	$core->framework->page->redirect('../../../index.php');
+if($core->auth->isLoggedIn($_SERVER['REMOTE_ADDR'], $core->auth->getCookie('pp_auth_token'), null, true) !== true){
+	$core->page->redirect('../../../index.php');
 }
 
 if(isset($_GET['do']) && $_GET['do'] == 'redirect' && isset($_GET['node'])){
@@ -30,15 +30,15 @@ if(isset($_GET['do']) && $_GET['do'] == 'redirect' && isset($_GET['node'])){
 	
 	if($select->rowCount() == 1) {
 		$n = $select->fetch();
-		$core->framework->page->redirect('view.php?id='.$n['id']);
+		$core->page->redirect('view.php?id='.$n['id']);
 	}else{
-		$core->framework->page->redirect('list.php');
+		$core->page->redirect('list.php');
 	}
 
 }
 
 if(!isset($_GET['id']))
-	$core->framework->page->redirect('list.php');
+	$core->page->redirect('list.php');
 
 /*
  * Select Node Information
@@ -49,7 +49,7 @@ $selectNode->execute(array(
 ));
 
 	if($selectNode->rowCount() != 1)
-		$core->framework->page->redirect('list.php?error=no_node');
+		$core->page->redirect('list.php?error=no_node');
 	else
 		$node = $selectNode->fetch();
 
@@ -64,15 +64,15 @@ $selectNode->execute(array(
 	<div class="container">
 		<div class="navbar navbar-default">
 			<div class="navbar-header">
-				<a class="navbar-brand" href="#"><?php echo $core->framework->settings->get('company_name'); ?></a>
+				<a class="navbar-brand" href="#"><?php echo $core->settings->get('company_name'); ?></a>
 			</div>
 			<div class="navbar-collapse navbar-responsive-collapse collapse" style="height: 1px;">
 				<ul class="nav navbar-nav navbar-right">
 					<li class="dropdown">
 						<a href="#" class="dropdown-toggle" data-toggle="dropdown">Account <b class="caret"></b></a>
 							<ul class="dropdown-menu">
-								<li><a href="<?php echo $core->framework->settings->get('master_url'); ?>logout.php">Logout</a></li>
-								<li><a href="<?php echo $core->framework->settings->get('master_url'); ?>servers.php">View All Servers</a></li>
+								<li><a href="<?php echo $core->settings->get('master_url'); ?>logout.php">Logout</a></li>
+								<li><a href="<?php echo $core->settings->get('master_url'); ?>servers.php">View All Servers</a></li>
 							</ul>
 					</li>
 				</ul>
@@ -142,6 +142,7 @@ $selectNode->execute(array(
 									<label for="name" class="control-label">GSD Secret Token</label>
 									<div>
 										<input type="text" readonly="readonly" value="<?php echo $node['gsd_secret']; ?>" class="form-control" />
+										<p><small>Please update your GSD configuration file and add this as a token that can connect and use it.</small></p>
 									</div>
 								</div>
 								<div class="form-group">
@@ -243,7 +244,7 @@ $selectNode->execute(array(
 									</div>
 									<div class="form-group">
 										<div>
-											<div class="alert alert-warning">Editing your username will require that you also update the account password below.</div>
+											<div class="alert alert-warning">Editing your username will require that you also update the account SSH keys below.</div>
 										</div>
 										<div class="checkbox">
 											<label>
@@ -272,7 +273,7 @@ $selectNode->execute(array(
 									<div class="form-group">
 										<label for="ssh_priv_key" class="control-label">SSH Private Key</label>
 										<div>
-											<input type="text" name="ssh_priv_key" value="<?php echo $node['ssh_priv']; ?>" autocomplete="off" class="form-control" />
+											<input type="text" name="ssh_priv_key" value="<?php echo $node['ssh_priv']; ?>" class="form-control" autocomplete="off"/>
 										</div>
 									</div>
 									<div class="form-group">

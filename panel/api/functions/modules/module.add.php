@@ -182,11 +182,11 @@ trait addServer {
 		/*
 		 * Add Server to Database
 		 */
-		$this->ftpUser = (strlen($data['server_name']) > 6) ? substr($data['server_name'], 0, 6).'_'.$core->framework->auth->keygen(5) : $data['server_name'].'_'.$core->framework->auth->keygen((11 - strlen($data['server_name'])));
+		$this->ftpUser = (strlen($data['server_name']) > 6) ? substr($data['server_name'], 0, 6).'_'.$core->auth->keygen(5) : $data['server_name'].'_'.$core->auth->keygen((11 - strlen($data['server_name'])));
 		
 		$this->add = $this->mysql->prepare("INSERT INTO `servers` VALUES(NULL, NULL, NULL, :hash, :e_iv, :node, :sname, :modpack, :sjar, 1, :oid, :ram, :disk, :cpu, :date, :sip, :sport, :ftpuser, :ftppass, :bfiles, :bdisk)");
 		$this->add->execute(array(
-			':hash' => $core->framework->auth->keygen(42),
+			':hash' => $core->auth->keygen(42),
 			':e_iv' => $iv,
 			':node' => $data['node'],
 			':sname' => $data['server_name'],
@@ -259,15 +259,7 @@ class apiModuleAddServer_Extended extends ssh {
 			 */
 			$softLimit = ($data['alloc_disk'] <= 512) ? 0 : ($_POST['alloc_disk'] - 512);
 			
-			$core->framework->ssh->generateSSH2Connection(array(
-				'ip' => $node['sftp_ip'],
-				'user' => $node['username']
-			), array(
-				'pub' => $node['ssh_pub'],
-				'priv' => $node['ssh_priv'],
-				'secret' => $node['ssh_secret'],
-				'secret_iv' => $node['ssh_secret_iv']
-			))->executeSSH2Command('cd /srv/scripts; sudo ./create_user.sh '.$ftpUser.' '.$data['sftp_pass_2'].' '.$softLimit.' '.$_POST['alloc_disk'], false);	
+			$core->ssh->generateSSH2Connection($node['id'], true)->executeSSH2Command('cd /srv/scripts; sudo ./create_user.sh '.$ftpUser.' '.$data['sftp_pass_2'].' '.$softLimit.' '.$_POST['alloc_disk'], false);	
 	
 	}
 

@@ -19,21 +19,21 @@
 session_start();
 require_once('../../../../../core/framework/framework.core.php');
 
-if($core->framework->auth->isLoggedIn($_SERVER['REMOTE_ADDR'], $core->framework->auth->getCookie('pp_auth_token'), null, true) !== true){
-	$core->framework->page->redirect('../../../../index.php');
+if($core->auth->isLoggedIn($_SERVER['REMOTE_ADDR'], $core->auth->getCookie('pp_auth_token'), null, true) !== true){
+	$core->page->redirect('../../../../index.php');
 }
 
 if(!isset($_POST['sid']) || !isset($_POST['nid']))
-	$core->framework->page->redirect('../../find.php');
+	$core->page->redirect('../../find.php');
 	
 if(!isset($_POST['sftp_pass'], $_POST['sftp_pass_2'], $_POST['nid']))
-	$core->framework->page->redirect('../../view.php?id='.$_POST['sid']);
+	$core->page->redirect('../../view.php?id='.$_POST['sid']);
 	
 if(strlen($_POST['sftp_pass']) < 8)
-	$core->framework->page->redirect('../../view.php?id='.$_POST['sid'].'&error=sftp_pass|sftp_pass_2&disp=pass_len');
+	$core->page->redirect('../../view.php?id='.$_POST['sid'].'&error=sftp_pass|sftp_pass_2&disp=pass_len');
 	
 if($_POST['sftp_pass'] != $_POST['sftp_pass_2'])
-	$core->framework->page->redirect('../../view.php?id='.$_POST['sid'].'&error=sftp_pass|sftp_pass_2&disp=pass_match');
+	$core->page->redirect('../../view.php?id='.$_POST['sid'].'&error=sftp_pass|sftp_pass_2&disp=pass_match');
 
 /* 
  * Select Node, User, & Server Information
@@ -65,28 +65,20 @@ $mysql->prepare("UPDATE `servers` SET `ftp_pass` = :pass, `encryption_iv` = :iv 
 /*
  * Connect to Node and Execute Password Update
  */
-$core->framework->ssh->generateSSH2Connection(array(
-	'ip' => $node['sftp_ip'],
-	'user' => $node['username']
-), array(
-	'pub' => $node['ssh_pub'],
-	'priv' => $node['ssh_priv'],
-	'secret' => $node['ssh_secret'],
-	'secret_iv' => $node['ssh_secret_iv']
-))->executeSSH2Command('cd /srv/scripts; sudo ./update_pass.sh "'.$server['ftp_user'].'" "'.$_POST['sftp_pass'].'"', false);
+$core->ssh->generateSSH2Connection($node['id'], true)->executeSSH2Command('cd /srv/scripts; sudo ./update_pass.sh "'.$server['ftp_user'].'" "'.$_POST['sftp_pass'].'"', false);
 
 /*
  * Send the User an Email
  */
 if(isset($_POST['email_user'])){
     
-    $core->framework->email->buildEmail('admin_new_sftppass', array(
+    $core->email->buildEmail('admin_new_sftppass', array(
         'PASS' => $_POST['sftp_pass'],
         'SERVER' => $server['name']
-    ))->dispatch($user['email'], $core->framework->settings->get('company_name').' - Your SFTP Password was Reset');
+    ))->dispatch($user['email'], $core->settings->get('company_name').' - Your SFTP Password was Reset');
     
 }
 
-$core->framework->page->redirect('../../view.php?id='.$_POST['sid']);
+$core->page->redirect('../../view.php?id='.$_POST['sid']);
 
 ?>

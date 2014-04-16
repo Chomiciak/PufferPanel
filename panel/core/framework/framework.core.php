@@ -37,12 +37,12 @@ require_once('lib/password.lib.php');
  */
 require_once('framework.database.connect.php');
 require_once('framework.auth.php');
-require_once('framework.ssh2.php');
 require_once('framework.page.php');
 require_once('framework.files.php');
-require_once('framework.settings.php');
 require_once('framework.user.php');
 require_once('framework.server.php');
+require_once('framework.settings.php');
+require_once('framework.ssh2.php');
 require_once('framework.log.php');
 require_once('framework.query.php');
 
@@ -55,21 +55,21 @@ require_once('email/core.email.php');
  * Initalize Global Framework
  */
 $core = new stdClass();
-$core->framework = new stdClass();
+set_exception_handler('pdo_exception_handler');
 
 /*
  * Initalize Frameworks
  */
-$core->framework->settings = new getSettings();
-$core->framework->auth = new auth();
-$core->framework->ssh = new ssh();
-$core->framework->user = new user($_SERVER['REMOTE_ADDR'], $core->framework->auth->getCookie('pp_auth_token'), $core->framework->auth->getCookie('pp_server_hash'));
-$core->framework->server = new server($core->framework->auth->getCookie('pp_server_hash'), $core->framework->user->getData('id'), $core->framework->user->getData('root_admin'));
-$core->framework->email = new tplMail($core->framework->settings);
-$core->framework->page = new page($core->framework->user, $core->framework->settings);
-$core->framework->log = new log($core->framework->user->getData('id'));
-$core->framework->gsd = new GSD_Query($core->framework->server->getData('id'));
-$core->framework->files = new files();
+$core->settings = new getSettings();
+$core->auth = new auth();
+$core->ssh = new ssh();
+$core->user = new user($_SERVER['REMOTE_ADDR'], $core->auth->getCookie('pp_auth_token'), $core->auth->getCookie('pp_server_hash'));
+$core->server = new server($core->auth->getCookie('pp_server_hash'), $core->user->getData('id'), $core->user->getData('root_admin'));
+$core->email = new tplMail($core->settings);
+$core->page = new page($core->user, $core->settings);
+$core->log = new log($core->user->getData('id'));
+$core->gsd = new GSD_Query($core->server->getData('id'));
+$core->files = new files();
 
 /*
  * MySQL PDO Connection Engine
@@ -80,8 +80,20 @@ function pdo_exception_handler($exception) {
     if ($exception instanceof PDOException) {
         
         error_log($exception);
-        
-        die(json_encode(array('error' => 'A MySQL error was encountered with this request.', 'e_code' => $exception->getCode(), 'e_line' => $exception->getLine(), 'e_time' => date('d-M-Y H:i:s', time()))));
+        exit('<!DOCTYPE html>
+        <html lang="en">
+        <head>
+        	<link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css">
+        </head>
+        <body>
+        	<div class="container">
+        		<h1>Database Error</h1>
+        			<div class="col-12">
+        				<div class="alert alert-danger"><strong>Error:</strong> An unexpected MySQL Error was encountered with this request. Please try again in a few minutes.</div>
+        			</div>
+        	</div>
+        </body>
+        </html>');
         
     } else {
     
@@ -89,6 +101,5 @@ function pdo_exception_handler($exception) {
     
     }
 }
-set_exception_handler('pdo_exception_handler');
 
 ?>
