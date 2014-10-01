@@ -181,19 +181,22 @@ trait components {
 	 * Creates a XSRF Token
 	 *
 	 * @param mixed $token
+	 * @param mixed $identifier
 	 * @return mixed
 	 */
-	public function XSRF($token = null){
+	public function XSRF($token = null, $identifier = null){
+
+		$this->tkid = "pp_xsrf_token".$identifier;
 
 		if(!is_null($token))
-			if(!is_null($this->getCookie('pp_xsrf_token')))
+			if(isset($_SESSION[$this->tkid]) && $_SESSION[$this->tkid] == $token)
 				return true;
 			else
 				return false;
 		else {
-			$xsrfToken = $this->keygen(10);
-			setcookie("pp_xsrf_token", $xsrfToken, (time() + 3600), '/');
-			return '<input type="hidden" name="xsrf" value="'.$xsrfToken.'" />';
+			$xsrfToken = base64_encode(openssl_random_pseudo_bytes(32));
+			$_SESSION[$this->tkid] = $xsrfToken;
+			return '<input type="hidden" name="xsrf'.$identifier.'" value="'.$xsrfToken.'" />';
 		}
 
 	}
