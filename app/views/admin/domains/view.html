@@ -1,0 +1,87 @@
+{% extends "admin_base.html" %}
+
+{% block title %}Viewing Domain{% endblock %}
+
+{% block content %}
+<div class="col-9">
+	<ul class="nav nav-tabs" id="config_tabs">
+		<li class="active"><a href="#subdomains" data-toggle="tab">Subdomains</a></li>
+		<li><a href="#settings" data-toggle="tab">Settings</a></li>
+	</ul>
+	<div class="tab-content">
+		<div class="tab-pane active" id="subdomains">
+			
+		</div>
+		<div class="tab-pane" id="settings">
+			<h3>Domain Settings</h3><hr />
+			<form action="ajax/domain/update.php" method="post">
+				<fieldset>
+					<div class="form-group">
+						<label class="control-label">CloudFlare's Email</label>
+						<div>
+							<input type="text" readonly="readonly" value="{{ domain.cf_email }}" class="form-control" />
+						</div>
+					</div>
+					<div class="form-group">
+						<label class="control-label">CloudFlare's API key</label>
+						<div>
+							<input type="text" readonly="readonly" value="{{ domain.cf_api_key }}" class="form-control" />
+						</div>
+					</div>
+					<div class="row">
+						<div class="form-group col-6 nopad">
+							<label for="alloc_mem" class="control-label">String Blacklist</label>
+							<div>
+								<input type="text" autocomplete="off" name="blacklist" value="{{ domain.blacklist }}" class="form-control" />
+							</div>
+						</div>
+						<div class="form-group col-6 nopad-right">
+							<label for="alloc_disk" class="control-label">Input Form</label>
+							<div>
+								<input type="text" name="input_form" value="{{ domain.input }}" class="form-control" />
+							</div>
+						</div>
+					</div>
+					<input type="hidden" name="id" value="{{ get.id }}" />
+					<input type="submit" value="Update Domain Settings" class="btn btn-primary btn-sm" />
+				</fieldset>
+			</form>
+		</div>
+	</div>
+</div>
+{% endblock %}
+
+{% block javascript %}
+<script type="text/javascript">
+	$(document).ready(function(){
+		setActiveOption('server-find');
+		if($.urlParam('error') != null){
+			var field = $.urlParam('error');
+			var exploded = field.split('|');
+				$.each(exploded, function(key, value) {
+					$('[name="' + value + '"]').parent().parent().addClass('has-error');
+				});
+		}
+
+		$("#server_ip").change(function() {
+			var ip = $(this).val().replace(/\./g, "\\.");
+			$("[id^=node_]").hide();
+			$("#node_"+ip).show();
+		});
+		$("#gen_pass_bttn").click(function(){
+			$.ajax({
+				type: "GET",
+				url: "add.php?do=generate_password",
+				success: function(data) {
+					$("#gen_pass").html('<strong>Generated Password:</strong> '+data);
+					$("#gen_pass").slideDown();
+					$('input[name="sftp_pass"]').val(data);
+					$('input[name="sftp_pass_2"]').val(data);
+					return false;
+				}
+			});
+			return false;
+		});
+	});
+</script>
+{% endblock %}

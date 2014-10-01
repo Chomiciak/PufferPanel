@@ -1,0 +1,150 @@
+{% extends "admin_base.html" %}
+
+{% block title %}Add a New Server{% endblock %}
+
+{% block content %}
+<div class="col-9">
+	<h3 class="nopad">Create New Domain</h3><hr />
+	{% if get.disp is defined and get.disp != 1 %}
+		{% if get.disp == 'missing_args' %}
+			<div class="alert alert-danger">Not all arguments were passed by the script.</div>
+		{% elseif get.disp == 's_fail' %}
+			<div class="alert alert-danger">The server name you entered does not meet the requirements. Must be at least 4 characters, and no more than 35. Server name can only contain a-zA-Z0-9_-</div>
+		{% endif %}
+	{% endif %}
+	<form action="ajax/new/create.php" method="POST">
+		<fieldset>
+			<div class="well">
+				<div class="row">
+					<div class="form-group col-6 nopad">
+						<label for="domain_name" class="control-label">Domain Name</label>
+						<div>
+							<input type="text" autocomplete="off" name="domain_name" class="form-control" />
+							<p class="text-muted" style="margin: 0 0 -10.5px;"><small><em>Character Limits: a-zA-Z0-9_- (Max 35 characters)</em></small></p>
+						</div>
+					</div>
+					<div class="form-group col-6 nopad">
+						<label for="api_email" class="control-label">CloudFlare's Email</label>
+						<div>
+							<input type="text" autocomplete="off" name="api_email" class="form-control" />
+							<p class="text-muted" style="margin: 0 0 -10.5px;"><small><em>Character Limits: a-zA-Z0-9_- (Max 35 characters)</em></small></p>
+						</div>
+					</div>
+				</div>
+				<div class="row">
+					<span id="updateList">
+						<div class="form-group col-6 nopad">
+							<label for="api_email" class="control-label">CloudFlare's API key</label>
+							<div>
+								<input type="text" autocomplete="off" name="api_key" class="form-control" />
+								<p class="text-muted" style="margin: 0 0 -10.5px;"><small><em>Character Limits: a-zA-Z0-9_- (Max 35 characters)</em></small></p>
+							</div>
+						</div>
+					</span>
+				</div>
+			</div>
+			<div class="well">
+				<h4 class="nopad">Allow SRV records</h3>
+				<div class="row">
+					<div class="form-group col-6 nopad">
+						<label for="api_email" class="control-label">String blacklist</label>
+						<div>
+							<input type="text" autocomplete="off" name="blacklist" class="form-control" />
+							<p class="text-muted" style="margin: 0 0 -10.5px;"><small><em>Character Limits: a-zA-Z0-9_- (Max 35 characters)</em></small></p>
+						</div>
+					</div>
+					<div class="form-group col-6 nopad">
+						<label for="api_email" class="control-label">Input Form</label>
+						<div>
+							<input type="text" autocomplete="off" name="input_form" class="form-control" />
+							<p class="text-muted" style="margin: 0 0 -10.5px;"><small><em>Character Limits: a-zA-Z0-9_- (Max 35 characters)</em></small></p>
+						</div>
+					</div>
+				</div>
+				<div class="row"><p><small>SRV records are allowing your clients to join minecraft from every port of subdomain. Specify blacklist of strings, that you don't want them to use (example for domain <code>panel.domain.tld</code> set blacklist to <code>panel</code>). Specify also input form, example every subdomain must start with <code>HOST-</code>, so you put <code>HOST-%name%</code> in the field.</small></p></div>
+			</div>
+			<div class="well">
+				<h4 class="nopad">Allow A/AAAA records</h3>
+				<div class="row">
+					<div class="form-group col-6 nopad">
+						<div>
+							<label><input type="checkbox" name="allow_websites" value="1" checked="checked"> Allow Websites<label><br>
+							<p><small class="text-muted"><em>Checking this will allow players to use A/AAAA DNS record with their SRV record's name. It can be used to host website on the same subdomain, that is used for server!</em></small></p>
+						</div>
+					</div>
+				</div>
+			</div>
+			<div class="well">
+				<input type="submit" value="Create Server" class="btn btn-primary btn-sm" />
+			</div>
+		</fieldset>
+	</form>
+</div>
+{% endblock %}
+
+{% block javascript %}
+<script type="text/javascript">
+	function updatePortList(){
+		$("#server_ip").change(function() {
+			var ip = $(this).val().replace(/\./g, "\\.");
+			$("[id^=node_]").hide();
+			$("#node_"+ip).show();
+		});
+	}
+	/*function updateList(){
+		var activeNode = $('#getNode').val();
+		$("#noPorts").hide();
+		$.ajax({
+			type: "POST",
+			url: "ajax/new/load_list.php",
+			data: {'node' : activeNode},
+			success: function(data) {
+				$('#updateList').html(data);
+				updatePortList();
+				return false;
+			}
+		});
+		return false;
+	}*/
+	$(document).ready(function(){
+		updateList();
+		$("#gen_pass_bttn").click(function(){
+			$.ajax({
+				type: "GET",
+				url: "add.php?do=generate_password",
+				success: function(data) {
+					$("#gen_pass").html('<strong>Generated Password:</strong> '+data);
+					$("#gen_pass").slideDown();
+					$('input[name="sftp_pass"]').val(data);
+					$('input[name="sftp_pass_2"]').val(data);
+					return false;
+				}
+			});
+			return false;
+		});
+		$('#getNode').change(function(){
+			updateList();
+		});
+		if($.urlParam('error') != null){
+
+			var field = $.urlParam('error');
+			var exploded = field.split('|');
+
+				$.each(exploded, function(key, value) {
+
+					$('[name="' + value + '"]').parent().parent().addClass('has-error');
+
+				});
+
+			var obj = $.parseJSON($.cookie('__TMP_pp_admin_newserver'));
+
+				$.each(obj, function(key, value) {
+
+					$('[name="' + key + '"]').val(value);
+
+				});
+
+		}
+	});
+</script>
+{% endblock %}
