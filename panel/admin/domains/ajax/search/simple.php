@@ -35,7 +35,7 @@ if($_POST['method'] != 'simple')
 if(empty($_POST['field']) || empty($_POST['operator']))
 	exit('<div class="error-box round">Required Variable Empty.</div>');
 
-if(!in_array($_POST['field'], array('name', 'server_ip', 'server_port', 'owner_email', 'active')))
+if(!in_array($_POST['field'], array('name', 'domain', 'server', 'enable_website', 'webserver_ip')))
 	exit('<div class="error-box round">Required `field` contains unknown value.</div>');
 
 if(!in_array($_POST['operator'], array('equal', 'not_equal', 'starts_w', 'ends_w', 'like')))
@@ -70,47 +70,28 @@ if($_POST['operator'] == 'starts_w'){
 /*
  * Different Search Method for Owner Email
  */
-if($_POST['field'] == 'owner_email'){
 
-	$findIDs = $mysql->prepare("SELECT `id` FROM `users` WHERE `email` ".$useOperator." :term");
-	$findIDs->execute(array(
-		':term' => $searchTerm
-	));
 
-	$find = $mysql->prepare("SELECT * FROM `servers` WHERE `owner_id` IN (".implode(',', $findIDs->fetchAll(PDO::FETCH_COLUMN, 0)).")");
-	$find->execute();
-
-}else{
-
-	$find = $mysql->prepare("SELECT * FROM `servers` WHERE `".$_POST['field']."` ".$useOperator." :term");
+	$find = $mysql->prepare("SELECT * FROM `subdomains` WHERE `".$_POST['field']."` ".$useOperator." :term");
 	$find->execute(array(
 		':term' => $searchTerm
 	));
 
-}
 
 	$returnRows = '';
 	while($row = $find->fetch()){
 
-		$isActive = ($row['active'] == '1') ? '<span class="label label-success">Enabled</span>' : '<span class="label label-danger">Disabled</span>';
-
-		$findUser = $mysql->prepare("SELECT `email` FROM `users` WHERE `id`  = :id");
-		$findUser->execute(array(
-			':id' => $row['owner_id']
-		));
-		$user = $findUser->fetch();
+		$hasWebsite = ($row['enable_website'] == '1') ? '<span class="label label-success">Enabled</span>' : '<span class="label label-danger">Disabled</span>';
 
 		$row['name'] = (strlen($row['name']) > 20) ? substr($row['name'], 0, 17).'...' : $row['name'];
-		$user['email'] = (strlen($user['email']) > 25) ? substr($user['email'], 0, 22).'...' : $user['email'];
-
 		$returnRows .= '
 		<tr>
 			<td><a href="../../../servers.php?goto='.$row['hash'].'"><i class="fa fa-tachometer"></i></a></td>
 			<td><a href="view.php?id='.$row['id'].'">'.$row['name'].'</a></td>
-			<td><a href="../node/view.php?id='.$row['node'].'">'.$core->settings->nodeName($row['node']).'</a></td>
-			<td>'.$row['server_ip'].':'.$row['server_port'].'</td>
-			<td><a href="../account/view.php?id='.$row['owner_id'].'">'.$user['email'].'</a></td>
+			<td><a href="../domains/view.php?id='.$row['domain'].'">'.$row['domain'].'</a></td>
+			<td>'.$row['server'].'</td>
 			<td style="text-align:center;">'.$isActive.'</td>
+			<td>'.$row['webserver_ip'].'</td>
 		</tr>
 		';
 
@@ -121,11 +102,11 @@ echo '
 	<thead>
 		<tr>
 			<th style="width:2%"></th>
-			<th>Server Name</th>
-			<th>Node</th>
-			<th>Connection Address</th>
-			<th>Owner Information</th>
-			<th></th>
+			<th>Subdomain name</th>
+			<th>Domain</th>
+			<th>Server</th>
+			<th>Has Website</th>
+			<th>Webserver</th>
 		</tr>
 	</thead>
 	<tbody>

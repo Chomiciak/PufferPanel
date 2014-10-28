@@ -1,13 +1,13 @@
 {% extends "admin_base.html" %}
 
-{% block title %}Find a Server{% endblock %}
+{% block title %}Find a Subdomain{% endblock %}
 
 {% block content %}
 <div class="col-9">
 	<ul class="nav nav-tabs" id="config_tabs">
 		<li class="active"><a href="#simple" data-toggle="tab">Simple Search</a></li>
 		<li><a href="#advanced" data-toggle="tab">Advanced Search</a></li>
-		<li><a href="#list_all" id="list_all_tab" data-toggle="tab">All Domains</a></li>
+		<li><a href="#list_all" id="list_all_tab" data-toggle="tab">All Subdomains</a></li>
 	</ul>
 	<div class="tab-content">
 		<div class="tab-pane active" id="simple">
@@ -17,11 +17,11 @@
 					<div class="form-group col-3 nopad">
 						<div>
 							<select class="form-control" name="field">
-								<option value="name" selected="selected">Domain Name</option>
-								<option value="server_ip">Pointing to</option>
-								<option value="server_port">Type</option>
-								<option value="owner_email">Owner Email</option>
-								<option value="active">Active</option>
+								<option value="name" selected="selected">Subdomain Name</option>
+								<option value="domain">Domain</option>
+								<option value="server_id">Server</option>
+								<option value="enable_website">Has Website</option>
+								<option value="webserver_ip">Webserver</option>
 							</select>
 						</div>
 					</div>
@@ -54,11 +54,11 @@
 					<div class="form-group col-3 nopad">
 						<div>
 							<select class="form-control" name="field_1">
-								<option value="name" selected="selected">Domain Name</option>
-								<option value="server_ip">Pointing to</option>
-								<option value="server_port">Type</option>
-								<option value="owner_email">Owner Email</option>
-								<option value="active">Active</option>
+								<option value="name" selected="selected">Subdomain Name</option>
+								<option value="domain">Domain</option>
+								<option value="server_id">Server</option>
+								<option value="enable_website">Has Website</option>
+								<option value="webserver_ip">Webserver</option>
 							</select>
 						</div>
 					</div>
@@ -90,11 +90,11 @@
 					<div class="form-group col-3 nopad">
 						<div>
 							<select class="form-control" name="field_2">
-								<option value="name">Domain Name</option>
-								<option value="server_ip">Pointing to</option>
-								<option value="server_port">Type</option>
-								<option value="owner_email" selected="selected">Owner Email</option>
-								<option value="active">Active</option>
+								<option value="name" selected="selected">Subdomain Name</option>
+								<option value="domain">Domain</option>
+								<option value="server_id">Server</option>
+								<option value="enable_website">Has Website</option>
+								<option value="webserver_ip">Webserver</option>
 							</select>
 						</div>
 					</div>
