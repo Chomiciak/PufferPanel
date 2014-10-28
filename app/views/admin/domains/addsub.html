@@ -1,0 +1,107 @@
+{% extends "admin_base.html" %}
+
+{% block title %}Add new Subdomain{% endblock %}
+
+{% block content %}
+<div class="col-9">
+	<h3 class="nopad">Create New Subdomain</h3><hr />
+	{% if get.disp is defined and get.disp != 1 %}
+		{% if get.disp == 'missing_args' %}
+			<div class="alert alert-danger">Not all arguments were passed by the script.</div>
+		{% elseif get.disp == 's_fail' %}
+			<div class="alert alert-danger">The subdomain name you entered does not meet the requirements. Must be at least 4 characters, and no more than 35. Subdomain name can only contain a-z0-9-</div>
+		{% elseif get.disp == 'name_on_blacklist' %}
+			<div class="alert alert-danger">This name is on blacklist (can't use it)!</div>
+		{% endif %}
+	{% endif %}
+	<form action="ajax/new/createsub.php" method="POST">
+		<fieldset>
+			<div class="well">
+				<div class="row">
+					<div class="form-group col-6 nopad">
+						<label for="subdomain_name" class="control-label">Subdomain Name</label>
+						<div>
+							<input type="text" autocomplete="off" name="subdomain_name" class="form-control" />
+							<p class="text-muted" style="margin: 0 0 -10.5px;"><small><em>Character Limits: a-zA-Z0-9_- (Max 35 characters)</em></small></p>
+						</div>
+					</div>
+					<div class="form-group col-6 nopad">
+						<label for="domain_name" class="control-label">Domain</label>
+						<div>
+							<select name="domain_name" id="getDomain" class="form-control">
+								{% for domain in domains %}
+									<option value="{{ domain.name }}">.{{ domain.name }}</option>
+								{% endfor %}
+							</select>
+						</div>
+					</div>
+				</div>
+			</div>
+			<div class="well">
+				<h4 class="nopad">SRV record</h3>
+				<div class="row">
+					<div class="form-group col-6 nopad">
+						<label for="server_id" class="control-label">Server ID</label>
+						<div>
+							<input type="text" autocomplete="off" name="server_id" class="form-control" />
+							<p class="text-muted" style="margin: 0 0 -10.5px;"><small><em>Number of the server, that this subdomain is pointing on.</em></small></p>
+						</div>
+					</div>
+				</div>
+				<div class="row"><p><small>The server would be avaliable from all ports on this subdomain.</small></p></div>
+			</div>
+			<div class="well">
+				<h4 class="nopad">A/AAAA record</h3>
+				<div class="row">
+					<div class="form-group col-6 nopad">
+						<div>
+							<label><input type="checkbox" name="make_website" value="1" checked="checked"> Make Website<label><br>
+							<p><small class="text-muted"><em>Checking this will point to given IP as a website. (When you enter this subdomain with webbrowser it will point to IP)</em></small></p>
+						</div>
+					</div>
+					<div class="form-group col-6 nopad">
+						<label for="api_email" class="control-label">IP address</label>
+						<div>
+							<input type="text" autocomplete="off" name="webserver_ip" class="form-control" />
+							<p class="text-muted" style="margin: 0 0 -10.5px;"><small><em>Ip address of webserver.</em></small></p>
+						</div>
+					</div>
+				</div>
+			</div>
+			<div class="well">
+				<input type="submit" value="Create Subdomain" class="btn btn-primary btn-sm" />
+			</div>
+		</fieldset>
+	</form>
+</div>
+{% endblock %}
+
+{% block javascript %}
+<script type="text/javascript">
+	$(document).ready(function(){
+		$('#getNode').change(function(){
+			updateList();
+		});
+		if($.urlParam('error') != null){
+
+			var field = $.urlParam('error');
+			var exploded = field.split('|');
+
+				$.each(exploded, function(key, value) {
+
+					$('[name="' + value + '"]').parent().parent().addClass('has-error');
+
+				});
+
+			var obj = $.parseJSON($.cookie('__TMP_pp_admin_newserver'));
+
+				$.each(obj, function(key, value) {
+
+					$('[name="' + key + '"]').val(value);
+
+				});
+
+		}
+	});
+</script>
+{% endblock %}

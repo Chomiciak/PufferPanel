@@ -46,7 +46,7 @@ require_once(BASE_DIR.'vendor/autoload.php');
  * used on a live environment if you wish.
  */
 use Tracy\Debugger;
-Debugger::enable(Debugger::DETECT, dirname(__DIR__).'/logs');
+Debugger::enable(Debugger::DEVELOPMENT, dirname(__DIR__).'/logs');
 Debugger::$strictMode = TRUE;
 
 /*
@@ -70,6 +70,7 @@ require_once('framework.query.php');
 require_once('framework.language.php');
 require_once('framework.functions.php');
 require_once('framework.email.php');
+require_once('framework.cloudflare.php');
 
 /*
  * Initalize Global Framework
@@ -88,6 +89,7 @@ $core->email = new tplMail();
 $core->log = new log($core->user->getData('id'));
 $core->gsd = new query($core->server->getData('id'));
 $core->files = new files();
+$core->dns = new subdomains();
 
 /*
  * Check Language Settings
